@@ -88,6 +88,7 @@ def files():
     files = get_uploaded_images()
     return render_template('files.html', files=files)
 
+
 def get_uploaded_images():
     rootdir = os.getcwd()
     # print (rootdir)
