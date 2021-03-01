@@ -6,8 +6,9 @@ This file creates your application.
 """
 import os
 from app import app
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import render_template, request, redirect, url_for, flash, session, abort, send_from_directory
 from werkzeug.utils import secure_filename
+from .forms import UploadForm
 
 
 ###
@@ -32,15 +33,24 @@ def upload():
         abort(401)
 
     # Instantiate your form class
+    photoForm = UploadForm()
 
     # Validate file upload on submit
     if request.method == 'POST':
-        # Get file data and save to your uploads folder
+        if photoForm.validate_on_submit():
+            
+            # Get file data and save to your uploads folder
+            photo = photoForm.photo.data
 
-        flash('File Saved', 'success')
-        return redirect(url_for('home'))
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(
+                app.config['UPLOAD_FOLDER'], filename
+            ))
 
-    return render_template('upload.html')
+            flash('File Saved', 'success')
+            return redirect(url_for('home'))
+        flash_errors(photoForm)
+    return render_template('upload.html', form=photoForm)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -63,6 +73,33 @@ def logout():
     flash('You were logged out', 'success')
     return redirect(url_for('home'))
 
+
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    root_dir = os.getcwd()
+    uploaddir = os.path.join(root_dir,app.config['UPLOAD_FOLDER'])
+    return send_from_directory(uploaddir, filename)
+
+
+@app.route('/files')
+def files():
+    if not session.get('logged_in'):
+        abort(401)
+    files = get_uploaded_images()
+    return render_template('files.html', files=files)
+
+def get_uploaded_images():
+    rootdir = os.getcwd()
+    # print (rootdir)
+    photos=[]
+    for subdir, dirs, files in os.walk(rootdir + '/uploads'):
+        for file in files:
+            # print (os.path.join(subdir, file))
+
+            # Checks has an image extension
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                photos.append(file)
+    return photos
 
 ###
 # The functions below should be applicable to all Flask apps.
