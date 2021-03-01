@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <h1 class="page-header">Photos Uploaded</h1>
+    <ul class="img-list wrapper">
+        {% for photo in files %}
+            <li><img class="photo" src="{{ url_for('get_image', filename=photo) }}" alt="{{photo}}"></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

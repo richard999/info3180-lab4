@@ -1,3 +1,13 @@
 body {
     padding-top: 5rem;
 }
+.img-list{
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 300px);
+    grid-auto-rows: 300px;
+}
+.photo{
+    width: 95%;
+    height: 95%
+}
